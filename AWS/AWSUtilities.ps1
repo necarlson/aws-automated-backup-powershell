@@ -71,31 +71,6 @@ function FixNewLines([string[]] $text)
     return $returnText
        
 }
-#Description: Returns the current log name by determining the timestamp for the first day of the current week
-#Returns: string
-function GetLogDate
-{
-    $dayOfWeek = (get-date).DayOfWeek
-    switch($dayOfWeek)
-    {
-        "Sunday" {$dayOfWeekNumber=0}
-        "Monday" {$dayOfWeekNumber=1}
-        "Tuesday" {$dayOfWeekNumber=2}
-        "Wednesday" {$dayOfWeekNumber=3}
-        "Thursday" {$dayOfWeekNumber=4}
-        "Friday" {$dayOfWeekNumber=5}
-        "Saturday" {$dayOfWeekNumber=6}
-    }
-    if($dayOfWeekNumber -eq 0)
-    {
-        $logDate = get-date -f yyyyMMdd
-    }
-    else
-    {
-        $logDate = get-date ((get-date).AddDays($dayOfWeekNumber * -1)) -f yyyyMMdd
-    } 
-    return  $logDate 
-}
 #Description: Writes a message to a log file, console
 #Returns: n/a
 function WriteToLog([string[]] $text, [bool] $isException = $false)
@@ -106,11 +81,11 @@ function WriteToLog([string[]] $text, [bool] $isException = $false)
         {
             [IO.Directory]::CreateDirectory($LOG_PATH) 
         }
-        $date = GetLogDate
+        $date = (get-date -f yyyyMMdd)
         $logFilePath = $LOG_PATH + $date + ".txt"
         $currentDatetime = get-date -format G 
         add-content -Path $logFilePath -Value "$currentDatetime $text"
-        write-host "$datetime $text"
+        write-host "$currentDatetime $text"
         if($isException)
         {
             write-eventlog -Logname "Application" -EntryType "Information" -EventID "0" -Source "AWS PowerShell Utilities" -Message $($text)
